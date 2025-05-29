@@ -3,6 +3,7 @@ import argparse
 import fire
 import os
 import sys
+from tqdm import tqdm
 
 import ai_economist.foundation as foundation
 import numpy as np
@@ -223,7 +224,7 @@ def main(policy_model='gpt', num_agents=100, episode_length=240, dialog_len=3, b
         os.makedirs(f'{save_path}data/{policy_model_save}')
     if not os.path.exists(f'{save_path}figs/{policy_model_save}'):
         os.makedirs(f'{save_path}figs/{policy_model_save}')
-    for epi in range(env.episode_length):
+    for epi in tqdm(range(env.episode_length)):
         if policy_model == 'gpt':
             actions, gpt_error, total_cost = gpt_actions(env, obs, dialog_queue, dialog4ref_queue, f'{save_path}data/{policy_model_save}/dialogs', gpt_error, total_cost)
         elif policy_model == 'complex':

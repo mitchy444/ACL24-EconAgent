@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import yaml
@@ -34,23 +35,22 @@ def get_multiple_completion(dialogs, num_cpus=15, temperature=0, max_tokens=100)
     return [response for response, _ in results], total_cost
 
 def get_completion(dialogs, temperature=0, max_tokens=100):
-    import openai
-    openai.api_key = 'Your Key'
-    import time
+    from openai import OpenAI
     
+    client = OpenAI(api_key=Path("key.txt").read_text())
+    import time
+
     max_retries = 20
     for i in range(max_retries):
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo-0613", # inaccessible now, try gpt-4o-mini
-                messages=dialogs,
-                temperature=temperature,
-                max_tokens=max_tokens
-            )
+            response = client.chat.completions.create(model="gpt-4o-mini", # inaccessible now, try gpt-4o-mini
+            messages=dialogs,
+            temperature=temperature,
+            max_tokens=max_tokens)
             prompt_tokens = response.usage.prompt_tokens
             completion_tokens = response.usage.completion_tokens
             this_cost = prompt_tokens/1000*prompt_cost_1k + completion_tokens/1000*completion_cost_1k
-            return response.choices[0].message["content"], this_cost
+            return response.choices[0].message.content, this_cost
         except Exception as e:
             if i < max_retries - 1:
                 time.sleep(6)
