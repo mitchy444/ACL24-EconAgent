@@ -50,7 +50,16 @@ def get_completion(dialogs, temperature=0, max_tokens=100):
             prompt_tokens = response.usage.prompt_tokens
             completion_tokens = response.usage.completion_tokens
             this_cost = prompt_tokens/1000*prompt_cost_1k + completion_tokens/1000*completion_cost_1k
-            return response.choices[0].message.content, this_cost
+            
+            content = response.choices[0].message.content
+            
+            # Extract JSON content that starts with { and ends with }
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                return json_match.group(), this_cost
+            else:
+                return content, this_cost
+                
         except Exception as e:
             if i < max_retries - 1:
                 time.sleep(6)
